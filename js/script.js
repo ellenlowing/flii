@@ -20,8 +20,8 @@ let gestureRecognizer;
 let runningMode = "IMAGE";
 let enableWebcamButton;
 let webcamRunning = false;
-const videoHeight = "360px";
-const videoWidth = "480px";
+const videoHeight = `${videoHeightVal}px`;
+const videoWidth = `${videoWidthVal}px`;
 // Before we can use HandLandmarker class we must wait for it to finish
 // loading. Machine Learning models can be large and take a moment to
 // get everything needed to run.
@@ -42,7 +42,6 @@ createGestureRecognizer().then(() => {
 });
 
 const video = document.getElementById("webcam");
-const canvasElement = document.getElementById("output_canvas");
 const canvasCtx = canvasElement.getContext("2d");
 const gestureOutput = document.getElementById("gesture_output");
 
