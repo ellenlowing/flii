@@ -51,6 +51,8 @@ const restartButton = document.getElementById("restartButton");
 ********************************************************************/
 let fly = new Fly();
 let vx = 0, vy = 0;
+let catchmarks = [];
+let popCatchmarkTimeout = 1000;
 let score = 0;
 noise.seed(Math.random());
 
@@ -167,7 +169,6 @@ async function predictWebcam() {
     if (video.currentTime !== lastVideoTime) {
         lastVideoTime = video.currentTime;
         results = gestureRecognizer.recognizeForVideo(video, nowInMs);
-        
     }
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -191,8 +192,8 @@ async function predictWebcam() {
     canvasCtx.restore();
 
     if (results.gestures.length > 0) {
-        gestureOutput.style.display = "block";
-        gestureOutput.style.width = videoWidth;
+        // gestureOutput.style.display = "block";
+        // gestureOutput.style.width = videoWidth;
         const categoryName = results.gestures[0][0].categoryName;
         const categoryScore = parseFloat(results.gestures[0][0].score * 100).toFixed(2);
         const handedness = results.handednesses[0][0].displayName;
@@ -233,6 +234,9 @@ restartButton.addEventListener("click", (e) => {
 })
 
 async function drawRoughCanvas() {
+    for(let catchmark of catchmarks) {
+        catchmark.show();
+    }
     fly.show();
 }
 
@@ -264,6 +268,11 @@ function closedFistHandler(e) {
         updateScore(score+1);
         fly.respawn();
     } 
+
+    catchmarks.push(new Catchmark(e.detail.center, e.detail.radius));
+    setTimeout(() => {
+        catchmarks.shift();
+    }, popCatchmarkTimeout)
 }   
 
 function debounce(func, timeout = 30){
