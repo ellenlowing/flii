@@ -51,6 +51,10 @@ section {
   opacity: 0.2;
 }
 
+#webcamButton {
+  display: none;
+}
+
 .detectOnClick {
   position: relative;
   float: left;

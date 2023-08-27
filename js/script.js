@@ -44,16 +44,77 @@ createGestureRecognizer().then(() => {
 const video = document.getElementById("webcam");
 const canvasCtx = canvasElement.getContext("2d");
 const gestureOutput = document.getElementById("gesture_output");
+const restartButton = document.getElementById("restartButton");
 
 /********************************************************************
 // Step 1: Init game variables
 ********************************************************************/
-let fly = new Fly(Math.random(), Math.random());
+let fly = new Fly();
+let vx = 0, vy = 0;
 let score = 0;
 noise.seed(Math.random());
 
 /********************************************************************
-// Step 2: Continuously grab image from webcam stream and detect it.
+// Step 2: Init gamepad
+********************************************************************/
+
+const haveEvents = "ongamepadconnected" in window;
+const controllers = {};
+
+function connecthandler(e) {
+  addgamepad(e.gamepad);
+}
+
+function addgamepad(gamepad) {
+  controllers[gamepad.index] = gamepad;
+  requestAnimationFrame(updateStatus);
+}
+
+function disconnecthandler(e) {
+  removegamepad(e.gamepad);
+}
+
+function removegamepad(gamepad) {
+  delete controllers[gamepad.index];
+}
+
+function updateStatus() {
+  if (!haveEvents) {
+    scangamepads();
+  }
+
+  Object.entries(controllers).forEach(([i, controller]) => {
+    vx = -controller.axes[0];
+    vy = controller.axes[1];
+  });
+
+  requestAnimationFrame(updateStatus);
+}
+
+function scangamepads() {
+  const gamepads = navigator.getGamepads();
+  for (const gamepad of gamepads) {
+    if (gamepad) {
+      // Can be null if disconnected during the session
+      if (gamepad.index in controllers) {
+        controllers[gamepad.index] = gamepad;
+      } else {
+        addgamepad(gamepad);
+      }
+    }
+  }
+}
+
+window.addEventListener("gamepadconnected", connecthandler);
+window.addEventListener("gamepaddisconnected", disconnecthandler);
+
+if (!haveEvents) {
+  setInterval(scangamepads, 500);
+}
+
+
+/********************************************************************
+// Step 3: Continuously grab image from webcam stream and detect it.
 ********************************************************************/
 
 // Check if webcam access is supported.
@@ -115,18 +176,18 @@ async function predictWebcam() {
     webcamElement.style.height = videoHeight;
     canvasElement.style.width = videoWidth;
     webcamElement.style.width = videoWidth;
-    if (results.landmarks) {
-        for (const landmarks of results.landmarks) {
-            drawingUtils.drawConnectors(landmarks, GestureRecognizer.HAND_CONNECTIONS, {
-                color: "#00FF00",
-                lineWidth: 5
-            });
-            drawingUtils.drawLandmarks(landmarks, {
-                color: "#FF0000",
-                lineWidth: 2
-            });
-        }
-    }
+    // if (results.landmarks) {
+    //     for (const landmarks of results.landmarks) {
+    //         drawingUtils.drawConnectors(landmarks, GestureRecognizer.HAND_CONNECTIONS, {
+    //             color: "#00FF00",
+    //             lineWidth: 5
+    //         });
+    //         drawingUtils.drawLandmarks(landmarks, {
+    //             color: "#FF0000",
+    //             lineWidth: 2
+    //         });
+    //     }
+    // }
     canvasCtx.restore();
 
     if (results.gestures.length > 0) {
@@ -147,7 +208,7 @@ async function predictWebcam() {
                 radius: fistRadius
             }
         });
-        if(categoryName == "Closed_Fist") {
+        if(categoryName == "Closed_Fist" || categoryName == "Thumb_Up" || categoryName == "Thumb_Down") {
             window.dispatchEvent(closedFistEvent);
         }
     }
@@ -155,7 +216,7 @@ async function predictWebcam() {
         gestureOutput.style.display = "none";
     }
 
-    fly.update();
+    fly.update(vx, vy);
     drawRoughCanvas();    
 
     // Call this function again to keep predicting when the browser is ready.
@@ -165,6 +226,11 @@ async function predictWebcam() {
 }
 
 window.addEventListener("closed_fist", debounce((e) => closedFistHandler(e)));
+
+restartButton.addEventListener("click", (e) => {
+    updateScore(0);
+    fly.reset();
+})
 
 async function drawRoughCanvas() {
     fly.show();
@@ -195,9 +261,8 @@ function closedFistHandler(e) {
     
     if(fistflydist < e.detail.radius) {
         // fly caught!
-        score++;
-        document.getElementById('score_val').innerHTML = score;
-        fly = new Fly(Math.random(), Math.random());
+        updateScore(score+1);
+        fly.respawn();
     } 
 }   
 
@@ -207,4 +272,9 @@ function debounce(func, timeout = 30){
     clearTimeout(timer);
     timer = setTimeout(() => { func.apply(this, args); }, timeout);
   };
+}
+
+function updateScore(newScore) {
+    score = newScore;
+    document.getElementById('score_val').innerHTML = score;
 }
