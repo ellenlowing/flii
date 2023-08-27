@@ -15,9 +15,11 @@
 //   mrf  '\_)'
 
 import { GestureRecognizer, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+import { PoseLandmarker } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 const demosSection = document.getElementById("demos");
 let gestureRecognizer;
-let runningMode = "IMAGE";
+let poseLandmarker = undefined;
+let runningMode = "VIDEO";
 let enableWebcamButton;
 let webcamRunning = false;
 const videoHeight = `${videoHeightVal}px`;
@@ -36,8 +38,23 @@ const createGestureRecognizer = async () => {
     });
     demosSection.classList.remove("invisible");
 };
+const createPoseLandmarker = async () => {
+    const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+    poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions: {
+            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+            delegate: "GPU"
+        },
+        runningMode: runningMode,
+        numPoses: 2
+    });
+    demosSection.classList.remove("invisible");
+};
 // Automatically enable webcam for debug
-createGestureRecognizer().then(() => {
+Promise.all([
+    createGestureRecognizer(),
+    createPoseLandmarker()
+]).then(() => {
     enableCam();
 });
 
@@ -134,8 +151,8 @@ else {
 }
 // Enable the live webcam view and start detection.
 function enableCam(event) {
-    if (!gestureRecognizer) {
-        alert("Please wait for gestureRecognizer to load");
+    if (!gestureRecognizer || !poseLandmarker) {
+        alert("Please wait for gestureRecognizer and poselandmarker to load");
         return;
     }
     if (webcamRunning === true) {
@@ -157,7 +174,8 @@ function enableCam(event) {
     });
 }
 let lastVideoTime = -1;
-let results = undefined;
+let gestureResults = undefined;
+let poseResults = undefined;
 async function predictWebcam() {
     const webcamElement = document.getElementById("webcam");
     // Now let's start detecting the stream.
@@ -165,10 +183,15 @@ async function predictWebcam() {
         runningMode = "VIDEO";
         await gestureRecognizer.setOptions({ runningMode: "VIDEO" });
     }
+    if (runningMode === "IMAGE") {
+        runningMode = "VIDEO";
+        await poseLandmarker.setOptions({ runningMode: "VIDEO" });
+    }
     let nowInMs = Date.now();
     if (video.currentTime !== lastVideoTime) {
         lastVideoTime = video.currentTime;
-        results = gestureRecognizer.recognizeForVideo(video, nowInMs);
+        gestureResults = gestureRecognizer.recognizeForVideo(video, nowInMs);
+        poseResults = poseLandmarker.detectForVideo(video, nowInMs);
     }
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -177,8 +200,8 @@ async function predictWebcam() {
     webcamElement.style.height = videoHeight;
     canvasElement.style.width = videoWidth;
     webcamElement.style.width = videoWidth;
-    // if (results.landmarks) {
-    //     for (const landmarks of results.landmarks) {
+    // if (gestureResults.landmarks) {
+    //     for (const landmarks of gestureResults.landmarks) {
     //         drawingUtils.drawConnectors(landmarks, GestureRecognizer.HAND_CONNECTIONS, {
     //             color: "#00FF00",
     //             lineWidth: 5
@@ -189,19 +212,27 @@ async function predictWebcam() {
     //         });
     //     }
     // }
+    if(poseResults.landmarks) {
+        for (const landmark of poseResults.landmarks) {
+            drawingUtils.drawLandmarks(landmark, {
+                radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)
+            });
+            drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+        }
+    }
     canvasCtx.restore();
 
-    if (results.gestures.length > 0) {
+    if (gestureResults.gestures.length > 0) {
         // gestureOutput.style.display = "block";
         // gestureOutput.style.width = videoWidth;
-        const categoryName = results.gestures[0][0].categoryName;
-        const categoryScore = parseFloat(results.gestures[0][0].score * 100).toFixed(2);
-        const handedness = results.handednesses[0][0].displayName;
+        const categoryName = gestureResults.gestures[0][0].categoryName;
+        const categoryScore = parseFloat(gestureResults.gestures[0][0].score * 100).toFixed(2);
+        const handedness = gestureResults.handednesses[0][0].displayName;
         gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore} %\n Handedness: ${handedness}`;
 
         // analyze gesture landmarks and pass to event
-        const fistCenter = getCenterOfPoints(results.landmarks[0]);
-        const fistRadius = Math.sqrt(getBoundingSqRadius(fistCenter, results.landmarks[0]));
+        const fistCenter = getCenterOfPoints(gestureResults.landmarks[0]);
+        const fistRadius = Math.sqrt(getBoundingSqRadius(fistCenter, gestureResults.landmarks[0]));
 
         let closedFistEvent = new CustomEvent("closed_fist", {
             detail: {
