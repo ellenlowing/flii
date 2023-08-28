@@ -56,6 +56,7 @@ Promise.all([
     createPoseLandmarker()
 ]).then(() => {
     enableCam();
+    startGame();
 });
 
 const video = document.getElementById("webcam");
@@ -69,6 +70,7 @@ const restartButton = document.getElementById("restartButton");
 let fly = new Fly();
 let vx = 0, vy = 0;
 let catchmarks = [];
+let targets = [];
 let popCatchmarkTimeout = 1000;
 let score = 0;
 noise.seed(Math.random());
@@ -200,26 +202,6 @@ async function predictWebcam() {
     webcamElement.style.height = videoHeight;
     canvasElement.style.width = videoWidth;
     webcamElement.style.width = videoWidth;
-    // if (gestureResults.landmarks) {
-    //     for (const landmarks of gestureResults.landmarks) {
-    //         drawingUtils.drawConnectors(landmarks, GestureRecognizer.HAND_CONNECTIONS, {
-    //             color: "#00FF00",
-    //             lineWidth: 5
-    //         });
-    //         drawingUtils.drawLandmarks(landmarks, {
-    //             color: "#FF0000",
-    //             lineWidth: 2
-    //         });
-    //     }
-    // }
-    if(poseResults.landmarks) {
-        for (const landmark of poseResults.landmarks) {
-            drawingUtils.drawLandmarks(landmark, {
-                radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)
-            });
-            drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        }
-    }
     canvasCtx.restore();
 
     if (gestureResults.gestures.length > 0) {
@@ -248,7 +230,25 @@ async function predictWebcam() {
         gestureOutput.style.display = "none";
     }
 
-    fly.update(vx, vy);
+    update();
+
+    // check if fly enters any targets
+    if(poseResults.landmarks.length > 0) {
+        for(let target of targets) {
+
+            // let dist = Math.sqrt(getSqDistanceBetweenPoints(targetpos, fly.pos));
+            // if(dist < target.radius) {
+            //     // lock target
+            //     target.setState('BITING');
+            //     break;
+            // }
+
+            let targetpos = poseResults.landmarks[0][target.landmarkIndex];
+            target.update(targetpos);
+
+        }
+    }
+
     drawRoughCanvas();    
 
     // Call this function again to keep predicting when the browser is ready.
@@ -260,15 +260,28 @@ async function predictWebcam() {
 window.addEventListener("closed_fist", debounce((e) => closedFistHandler(e)));
 
 restartButton.addEventListener("click", (e) => {
-    updateScore(0);
-    fly.reset();
+    startGame();
 })
+
+function update() {
+    fly.update(vx, vy);
+}
 
 async function drawRoughCanvas() {
     for(let catchmark of catchmarks) {
         catchmark.show();
     }
+    if(poseResults.landmarks.length > 0) {
+        for(let target of targets) {
+            target.show();
+        }
+    }
+    
     fly.show();
+}
+
+function getSqDistanceBetweenPoints(p1, p2) {
+    return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
 }
 
 function getCenterOfPoints(arr) {
@@ -283,7 +296,7 @@ function getCenterOfPoints(arr) {
 function getBoundingSqRadius(center, arr) {
     let maxsqdist = -1;
     for(let pt of arr) {
-        let sqdist = Math.pow(pt.x - center.x, 2) + Math.pow(pt.y - center.y, 2);
+        let sqdist = getSqDistanceBetweenPoints(pt, center);
         if(sqdist > maxsqdist) {
             maxsqdist = sqdist;
         }
@@ -291,8 +304,30 @@ function getBoundingSqRadius(center, arr) {
     return maxsqdist;
 }
 
+function startGame() {
+    updateScore(0);
+    fly.reset();
+    
+    // initialize 4 targets that are mutually exclusive from each other
+    targets = [];
+    let targetIndices = [];
+    while(targetIndices.length < 4) {
+        let targetIndex = Math.floor(Math.random() * 33);
+        if(targetIndex < 15 || targetIndex > 22) { // reject indices that are involve hands
+            if(targetIndices.indexOf(targetIndex) == -1) { // check if existing indices already have this number
+                targetIndices.push(targetIndex);
+            }
+        }
+    }
+
+    for(let idx of targetIndices) {
+        targets.push(new Target(idx));
+        console.log(idx);
+    }
+}
+
 function closedFistHandler(e) {
-    let fistflydist = Math.sqrt(Math.pow(e.detail.center.x - fly.pos.x, 2) + Math.pow(e.detail.center.y - fly.pos.y, 2));
+    let fistflydist = Math.sqrt(getSqDistanceBetweenPoints(e.detail.center, fly.pos));
     
     if(fistflydist < e.detail.radius) {
         // fly caught!

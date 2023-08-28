@@ -1,8 +1,8 @@
 class Fly {
     constructor() {
         this.roughstyle = {
-            fill: 'black',
-            stroke: 'black'
+            fill: 'blue',
+            stroke: 'blue'
         };
         this.seedx = Math.random() * 5;
         this.seedy = Math.random() * 5;
