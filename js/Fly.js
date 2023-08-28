@@ -8,8 +8,17 @@ class Fly {
         this.wingstyle = {
             ...globalRoughStyle,
             fill: 'white',
-            stroke: 'black'
-        }
+            stroke: 'black',
+            fillStyle: 'cross-hatch',
+            fillWidth: 2
+        };
+        this.eyestyle = {
+            ...globalRoughStyle,
+            fill: '#A0250C',
+            stroke: '#000000',
+            strokeWidth: 0.3,
+            roughness: 1
+        };
         this.seedx = Math.random() * 5;
         this.seedy = Math.random() * 5;
         this.reset();
@@ -23,7 +32,8 @@ class Fly {
 
     respawn() {
         this.pos = {x: Math.random(), y: Math.random()};
-        this.speed += 0.0005;
+        this.heading = Math.random() * Math.PI;
+        // this.speed += 0.0005;
     }
 
     update(vx, vy) {
@@ -42,6 +52,8 @@ class Fly {
         rc.ellipse(10, 0, 20, 12, this.wingstyle);
         rc.ellipse(-10, 0, 20, 12, this.wingstyle);
         rc.ellipse(0, 0, 12, 20, this.roughstyle);
+        rc.ellipse(-3.5, -10, 6, 6, this.eyestyle);
+        rc.ellipse(3.5, -10, 6, 6, this.eyestyle);
         canvasCtx.restore();
     }
 }

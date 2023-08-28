@@ -5,8 +5,9 @@ class Path {
         this.stepSize = 20;
         this.roughstyle = {
             ...globalRoughStyle, 
-            strokeLineDash: [2, 40],
-            roughness: 0
+            strokeLineDash: [2, 10],
+            roughness: 0,
+            strokeWidth: 3
         };
     }
 

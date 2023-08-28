@@ -53,6 +53,8 @@ let fly = new Fly();
 let flyPath = new Path();
 let vx = 0, vy = 0;
 let catchmarks = [];
+let candy = null;
+let annoyance = new Meter();
 let popCatchmarkTimeout = 1000;
 let score = 0;
 noise.seed(Math.random());
@@ -222,11 +224,13 @@ restartButton.addEventListener("click", (e) => {
 })
 
 function update() {
+    annoyance.update();
     fly.update(vx, vy);
     flyPath.addRoughPoint(fly.pos.x * videoWidthVal, fly.pos.y * videoHeightVal);
 }
 
 async function draw() {
+    annoyance.show();
     for(let catchmark of catchmarks) {
         catchmark.show();
     }
@@ -257,6 +261,8 @@ function getBoundingSqRadius(center, arr) {
 function startGame() {
     updateScore(0);
     fly.reset();
+    flyPath = new Path();
+    annoyance = new Meter();
 }
 
 function closedFistHandler(e) {
