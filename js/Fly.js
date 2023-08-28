@@ -20,10 +20,15 @@ class Fly {
     }
 
     update(vx, vy) {
-        // let x = this.clamp(this.pos.x + noise.perlin2(this.seedx, Date.now() * 0.001) * 0.01, 0, 1);
-        // let y = this.clamp(this.pos.y + noise.perlin2(this.seedy, Date.now() * 0.001) * 0.01, 0, 1);
-        let x = clamp(this.pos.x + vx * this.speed, 0, 1);
-        let y = clamp(this.pos.y + vy * this.speed, 0, 1);
+        let x = 0, y = 0;
+        if(gameState == 'FREE') {
+            x = clamp(this.pos.x + vx * this.speed, 0, 1);
+            y = clamp(this.pos.y + vy * this.speed, 0, 1);
+        } else if (gameState == 'BITING') {
+            x = this.pos.x;
+            y = this.pos.y;
+        }
+        
         this.pos = {x: x, y: y};
     }
 

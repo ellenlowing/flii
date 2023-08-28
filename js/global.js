@@ -8,6 +8,11 @@ const globalRoughStyle = {
     fillStyle: 'solid'
 }
 
+// game states could be 
+// 1. FREE : human freely catching fly
+// 2. BITING : Flii has locked on this target and is biting 
+let gameState = 'FREE';
+
 const clamp = (num, min, max) => {
     return Math.min(Math.max(num, min), max);
 }

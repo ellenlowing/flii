@@ -232,24 +232,7 @@ async function predictWebcam() {
 
     update();
 
-    // check if fly enters any targets
-    if(poseResults.landmarks.length > 0) {
-        for(let target of targets) {
-
-            // let dist = Math.sqrt(getSqDistanceBetweenPoints(targetpos, fly.pos));
-            // if(dist < target.radius) {
-            //     // lock target
-            //     target.setState('BITING');
-            //     break;
-            // }
-
-            let targetpos = poseResults.landmarks[0][target.landmarkIndex];
-            target.update(targetpos);
-
-        }
-    }
-
-    drawRoughCanvas();    
+    draw();    
 
     // Call this function again to keep predicting when the browser is ready.
     if (webcamRunning === true) {
@@ -264,10 +247,30 @@ restartButton.addEventListener("click", (e) => {
 })
 
 function update() {
+
     fly.update(vx, vy);
+
+    // check if fly enters any targets
+    if(poseResults.landmarks.length > 0) {
+        for(let target of targets) {
+
+            let targetpos = poseResults.landmarks[0][target.landmarkIndex];
+            target.update(targetpos);
+            
+            if(gameState == 'FREE') {
+                let dist = Math.sqrt(getSqDistanceBetweenPoints(targetpos, fly.pos));
+                if(dist < target.normradius) {
+                    // lock target
+                    gameState = 'BITING';
+                    // target.active = false;
+                }
+            }
+
+        }
+    }
 }
 
-async function drawRoughCanvas() {
+async function draw() {
     for(let catchmark of catchmarks) {
         catchmark.show();
     }
