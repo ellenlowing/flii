@@ -39,10 +39,10 @@ const createGestureRecognizer = async () => {
 // Automatically enable webcam for debug
 createGestureRecognizer().then(() => {
     enableCam();
+    startGame();
 });
 
 const video = document.getElementById("webcam");
-const canvasCtx = canvasElement.getContext("2d");
 const gestureOutput = document.getElementById("gesture_output");
 const restartButton = document.getElementById("restartButton");
 
@@ -50,6 +50,7 @@ const restartButton = document.getElementById("restartButton");
 // Step 1: Init game variables
 ********************************************************************/
 let fly = new Fly();
+let flyPath = new Path();
 let vx = 0, vy = 0;
 let catchmarks = [];
 let popCatchmarkTimeout = 1000;
@@ -177,18 +178,6 @@ async function predictWebcam() {
     webcamElement.style.height = videoHeight;
     canvasElement.style.width = videoWidth;
     webcamElement.style.width = videoWidth;
-    // if (results.landmarks) {
-    //     for (const landmarks of results.landmarks) {
-    //         drawingUtils.drawConnectors(landmarks, GestureRecognizer.HAND_CONNECTIONS, {
-    //             color: "#00FF00",
-    //             lineWidth: 5
-    //         });
-    //         drawingUtils.drawLandmarks(landmarks, {
-    //             color: "#FF0000",
-    //             lineWidth: 2
-    //         });
-    //     }
-    // }
     canvasCtx.restore();
 
     if (results.gestures.length > 0) {
@@ -217,8 +206,8 @@ async function predictWebcam() {
         gestureOutput.style.display = "none";
     }
 
-    fly.update(vx, vy);
-    drawRoughCanvas();    
+    update();
+    draw();    
 
     // Call this function again to keep predicting when the browser is ready.
     if (webcamRunning === true) {
@@ -229,15 +218,20 @@ async function predictWebcam() {
 window.addEventListener("closed_fist", debounce((e) => closedFistHandler(e)));
 
 restartButton.addEventListener("click", (e) => {
-    updateScore(0);
-    fly.reset();
+    startGame();
 })
 
-async function drawRoughCanvas() {
+function update() {
+    fly.update(vx, vy);
+    flyPath.addRoughPoint(fly.pos.x * videoWidthVal, fly.pos.y * videoHeightVal);
+}
+
+async function draw() {
     for(let catchmark of catchmarks) {
         catchmark.show();
     }
     fly.show();
+    flyPath.show();
 }
 
 function getCenterOfPoints(arr) {
@@ -260,16 +254,24 @@ function getBoundingSqRadius(center, arr) {
     return maxsqdist;
 }
 
+function startGame() {
+    updateScore(0);
+    fly.reset();
+}
+
 function closedFistHandler(e) {
     let fistflydist = Math.sqrt(Math.pow(e.detail.center.x - fly.pos.x, 2) + Math.pow(e.detail.center.y - fly.pos.y, 2));
-    
+    let flycaught = false;
+
     if(fistflydist < e.detail.radius) {
         // fly caught!
         updateScore(score+1);
         fly.respawn();
+        flyPath.clearPoints();
+        flycaught = true;
     } 
 
-    catchmarks.push(new Catchmark(e.detail.center, e.detail.radius));
+    catchmarks.push(new Catchmark(e.detail.center, e.detail.radius, flycaught));
     setTimeout(() => {
         catchmarks.shift();
     }, popCatchmarkTimeout)

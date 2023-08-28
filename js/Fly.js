@@ -1,12 +1,19 @@
 class Fly {
     constructor() {
         this.roughstyle = {
+            ...globalRoughStyle,
             fill: 'black',
             stroke: 'black'
         };
+        this.wingstyle = {
+            ...globalRoughStyle,
+            fill: 'white',
+            stroke: 'black'
+        }
         this.seedx = Math.random() * 5;
         this.seedy = Math.random() * 5;
         this.reset();
+        this.heading = 0;
     }
 
     reset() {
@@ -20,14 +27,21 @@ class Fly {
     }
 
     update(vx, vy) {
-        // let x = this.clamp(this.pos.x + noise.perlin2(this.seedx, Date.now() * 0.001) * 0.01, 0, 1);
-        // let y = this.clamp(this.pos.y + noise.perlin2(this.seedy, Date.now() * 0.001) * 0.01, 0, 1);
         let x = clamp(this.pos.x + vx * this.speed, 0, 1);
         let y = clamp(this.pos.y + vy * this.speed, 0, 1);
         this.pos = {x: x, y: y};
+        if(vx != 0 && vy != 0) {
+            this.heading = Math.atan2(vy, vx) + Math.PI / 2;
+        }
     }
 
     show() {
-        rc.circle(this.pos.x * videoWidthVal, this.pos.y * videoHeightVal, 20, {...globalRoughStyle, ...this.roughstyle});
+        canvasCtx.save();
+        canvasCtx.translate(this.pos.x * videoWidthVal, this.pos.y * videoHeightVal);
+        canvasCtx.rotate(this.heading);
+        rc.ellipse(10, 0, 20, 12, this.wingstyle);
+        rc.ellipse(-10, 0, 20, 12, this.wingstyle);
+        rc.ellipse(0, 0, 12, 20, this.roughstyle);
+        canvasCtx.restore();
     }
 }

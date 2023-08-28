@@ -1,12 +1,13 @@
 class Catchmark {
-    constructor(center, radius) {
+    constructor(center, radius, flycaught=false) {
         this.center = center;
         this.r1 = radius * videoWidthVal;
         this.r2 = this.r1 * (Math.random() * 0.3 + 0.5);
         this.steps = Math.random() * 0.4 + 0.1;
+        this.flycaught = flycaught;
         this.roughstyle = {
             ...globalRoughStyle, 
-            stroke: '#ffff00',
+            stroke: flycaught ? '#ff0000' : '#ffff00',
             disableMultiStroke: false
         };
     }
