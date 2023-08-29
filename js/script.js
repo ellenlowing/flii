@@ -55,7 +55,9 @@ let vx = 0, vy = 0;
 let catchmarks = [];
 let candy = null;
 let annoyance = new Meter();
-let popCatchmarkTimeout = 1000;
+let popCatchmarkTimeout = 1000; // same as cooldown
+let catchCooldownTime = 1000;
+let catchCooled = true;
 let score = 0;
 noise.seed(Math.random());
 
@@ -202,7 +204,14 @@ async function predictWebcam() {
             }
         });
         if(categoryName == "Closed_Fist" || categoryName == "Thumb_Up" || categoryName == "Thumb_Down") {
-            window.dispatchEvent(closedFistEvent);
+            if(catchCooled) {
+                window.dispatchEvent(closedFistEvent);
+                catchCooled = false;
+                setTimeout(() => {
+                    catchCooled = true;
+                }, catchCooldownTime);
+            }
+            
         }
     }
     else {
@@ -218,7 +227,7 @@ async function predictWebcam() {
     }
 }
 
-window.addEventListener("closed_fist", debounce((e) => closedFistHandler(e)));
+window.addEventListener("closed_fist", e => closedFistHandler(e));
 
 restartButton.addEventListener("click", (e) => {
     startGame();
