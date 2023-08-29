@@ -197,7 +197,8 @@ async function predictWebcam() {
         let closedFistEvent = new CustomEvent("closed_fist", {
             detail: {
                 center: fistCenter,
-                radius: fistRadius
+                radius: fistRadius,
+                handedness: handedness
             }
         });
         if(categoryName == "Closed_Fist" || categoryName == "Thumb_Up" || categoryName == "Thumb_Down") {
@@ -225,7 +226,17 @@ restartButton.addEventListener("click", (e) => {
 
 function update() {
     annoyance.update();
+    if(annoyance.value > 0.4 && candy == null) {
+        candy = new Candy();
+    }
     fly.update(vx, vy);
+    if(candy) {
+        const sqdist = Math.sqrt(getSqDistanceBetweenPoints(fly.pos, candy.pos));
+        if(sqdist < candy.nr) {
+            fly.speedup();
+            candy = null;
+        }
+    }
     flyPath.addRoughPoint(fly.pos.x * videoWidthVal, fly.pos.y * videoHeightVal);
 }
 
@@ -234,8 +245,13 @@ async function draw() {
     for(let catchmark of catchmarks) {
         catchmark.show();
     }
+    if(candy) candy.show();
     fly.show();
     flyPath.show();
+}
+
+function getSqDistanceBetweenPoints(p1, p2) {
+    return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
 }
 
 function getCenterOfPoints(arr) {
@@ -250,7 +266,7 @@ function getCenterOfPoints(arr) {
 function getBoundingSqRadius(center, arr) {
     let maxsqdist = -1;
     for(let pt of arr) {
-        let sqdist = Math.pow(pt.x - center.x, 2) + Math.pow(pt.y - center.y, 2);
+        let sqdist = getSqDistanceBetweenPoints(pt, center);
         if(sqdist > maxsqdist) {
             maxsqdist = sqdist;
         }
@@ -263,10 +279,11 @@ function startGame() {
     fly.reset();
     flyPath = new Path();
     annoyance = new Meter();
+    candy = null;
 }
 
 function closedFistHandler(e) {
-    let fistflydist = Math.sqrt(Math.pow(e.detail.center.x - fly.pos.x, 2) + Math.pow(e.detail.center.y - fly.pos.y, 2));
+    let fistflydist = Math.sqrt(getSqDistanceBetweenPoints(e.detail.center, fly.pos));
     let flycaught = false;
 
     if(fistflydist < e.detail.radius) {
@@ -275,9 +292,11 @@ function closedFistHandler(e) {
         fly.respawn();
         flyPath.clearPoints();
         flycaught = true;
+        candy = null;
+        annoyance.value = 0;
     } 
 
-    catchmarks.push(new Catchmark(e.detail.center, e.detail.radius, flycaught));
+    catchmarks.push(new Catchmark(e.detail.center, e.detail.radius, e.detail.handedness, flycaught));
     setTimeout(() => {
         catchmarks.shift();
     }, popCatchmarkTimeout)

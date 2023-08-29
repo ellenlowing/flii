@@ -36,6 +36,10 @@ class Fly {
         // this.speed += 0.0005;
     }
 
+    speedup() {
+        this.speed += 0.0005;
+    }
+
     update(vx, vy) {
         let x = clamp(this.pos.x + vx * this.speed, 0, 1);
         let y = clamp(this.pos.y + vy * this.speed, 0, 1);
@@ -49,9 +53,10 @@ class Fly {
         canvasCtx.save();
         canvasCtx.translate(this.pos.x * videoWidthVal, this.pos.y * videoHeightVal);
         canvasCtx.rotate(this.heading);
-        rc.ellipse(10, 0, 20, 12, this.wingstyle);
-        rc.ellipse(-10, 0, 20, 12, this.wingstyle);
+        rc.ellipse(10, 0, 20, 10, this.wingstyle);
+        rc.ellipse(-10, 0, 20, 10, this.wingstyle);
         rc.ellipse(0, 0, 12, 20, this.roughstyle);
+        rc.polygon([[-2, -10], [0, -20], [2, -10]], this.roughstyle);
         rc.ellipse(-3.5, -10, 6, 6, this.eyestyle);
         rc.ellipse(3.5, -10, 6, 6, this.eyestyle);
         canvasCtx.restore();

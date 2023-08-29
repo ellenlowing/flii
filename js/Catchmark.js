@@ -1,15 +1,20 @@
 class Catchmark {
-    constructor(center, radius, flycaught=false) {
+    constructor(center, radius, handedness, flycaught=false) {
         this.center = center;
+        this.handedness = handedness;
         this.r1 = radius * videoWidthVal;
         this.r2 = this.r1 * (Math.random() * 0.3 + 0.5);
+        this.scale = map(radius, 0, 0.25, 0.2, 3);
         this.steps = Math.random() * 0.4 + 0.1;
         this.flycaught = flycaught;
         this.roughstyle = {
             ...globalRoughStyle, 
             stroke: flycaught ? '#ff0000' : '#ffff00',
-            disableMultiStroke: false
+            disableMultiStroke: true,
+            fill: '#ffffff',
+            fillStyle: 'hachure'
         };
+        console.log(radius);
     }
 
     show() {
@@ -20,5 +25,15 @@ class Catchmark {
             let y2 = this.r2 * Math.sin(deg) + this.center.y * videoHeightVal;
             rc.line(x1, y1, x2, y2, this.roughstyle);
         }
+        rc.circle(this.center.x * videoWidthVal, this.center.y * videoHeightVal, this.r1);
+        // canvasCtx.save();
+        // canvasCtx.translate((this.center.x) * videoWidthVal, this.center.y * videoHeightVal);
+        // if(this.handedness == 'Right') {
+        //     canvasCtx.scale(this.scale, this.scale);
+        // } else {
+        //     canvasCtx.scale(-this.scale, this.scale);
+        // }
+        // rc.path("M90.67,32.361c1.5-16-16-17.5-16-17.5c-5-14.5-18-7-18-7c-6.5-14.5-19.5-4.5-19.5-4.5c-18.5-5.5-20.5,10.5-20.5,10.5c-1.312,4.964-0.896,21.13-0.896,21.13c-1.25-9.5-8.604-3.13-8.604-3.13c-9.5,10.5-5,18-5,18c8,14,27,32.5,27,32.5c7,6,3,9.5,3,9.5l48.5,0.5l2.666-9C94.336,62.361,90.67,32.361,90.67,32.361z", this.roughstyle);
+        // canvasCtx.restore();
     }
 }

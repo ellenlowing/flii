@@ -8,7 +8,8 @@ class Meter {
         this.outlinestyle = {
             fill: '#ffffff00',
             stroke: '#ffffff',
-            roughness: 0.5
+            roughness: 0.5,
+            strokeWidth: 3
         };
         this.fillstyle = {
             stroke: '#ffffff00',
@@ -21,7 +22,7 @@ class Meter {
     }
 
     update() {
-        this.value += 0.001;
+        // this.value += 0.001;
         this.outlinestyle.roughness = map(this.value, 0, 1, 0, 2.5);
         this.fillstyle.roughness = this.outlinestyle.roughness;
 
@@ -36,7 +37,9 @@ class Meter {
         canvasCtx.translate(this.x, this.y);
         canvasCtx.scale(-1, 1);
         rc.rectangle(0, 0, this.w, this.h, this.outlinestyle);
-        rc.rectangle(0, 0, this.w * this.value, this.h, this.fillstyle);
+        if(this.value > 0) {
+            rc.rectangle(2, 2, this.w * this.value - 4, this.h - 4, this.fillstyle);
+        }
         canvasCtx.restore();
     }
 }
