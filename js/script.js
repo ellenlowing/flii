@@ -52,13 +52,18 @@ const restartButton = document.getElementById("restartButton");
 let fly = new Fly();
 let flyPath = new Path();
 let vx = 0, vy = 0;
+let btn = false;
+let btnreset = true;
 let catchmarks = [];
 let candy = null;
-let annoyance = new Meter();
-let popCatchmarkTimeout = 1000; // same as cooldown
-let catchCooldownTime = 1000;
+// let annoyance = new Meter();
+let catchCooldownTime = 2000;
 let catchCooled = true;
+let fist = null;
 let score = 0;
+let flyLives = 3;
+let humanLives = 3;
+let bitemeter = null;
 noise.seed(Math.random());
 
 /********************************************************************
@@ -93,6 +98,10 @@ function updateStatus() {
   Object.entries(controllers).forEach(([i, controller]) => {
     vx = -controller.axes[0];
     vy = controller.axes[1];
+    btn = controller.buttons[0].pressed;
+    if (!btn) {
+        btnreset = true;
+    }
   });
 
   requestAnimationFrame(updateStatus);
@@ -207,8 +216,11 @@ async function predictWebcam() {
             if(catchCooled) {
                 window.dispatchEvent(closedFistEvent);
                 catchCooled = false;
+                bitemeter = new Meter(fist.center.x, fist.center.y + fist.radius, map(fist.radius, 0, 0.25, 50, 200));
                 setTimeout(() => {
                     catchCooled = true;
+                    fist = null;
+                    bitemeter = null;
                 }, catchCooldownTime);
             }
             
@@ -234,29 +246,55 @@ restartButton.addEventListener("click", (e) => {
 })
 
 function update() {
-    annoyance.update();
-    if(annoyance.value > 0.4 && candy == null) {
-        candy = new Candy();
-    }
-    fly.update(vx, vy);
-    if(candy) {
-        const sqdist = Math.sqrt(getSqDistanceBetweenPoints(fly.pos, candy.pos));
-        if(sqdist < candy.nr) {
-            fly.speedup();
-            candy = null;
+    // annoyance and candy
+    // annoyance.update();
+    // if(annoyance.value > 0.4 && candy == null) {
+    //     candy = new Candy();
+    // }
+    // if(candy) {
+    //     const sqdist = Math.sqrt(getSqDistanceBetweenPoints(fly.pos, candy.pos));
+    //     if(sqdist < candy.nr) {
+    //         fly.speedup();
+    //         candy = null;
+    //     }
+    // }
+
+    if(fist && bitemeter) {
+        let fistflydist = Math.sqrt(getSqDistanceBetweenPoints(fist.center, fly.pos));
+        
+        if(bitemeter.value >= 1) {
+            console.log('taking 1 human life');
+            updateHumanLives(humanLives - 1);
+            catchCooled = true;
+            fist = null;
+            bitemeter = null;
+            catchmarks.shift();
+        } else if(fistflydist < fist.radius) {
+            if(btn && btnreset) {
+                // meter increases !
+                bitemeter.value += 0.2;
+                bitemeter.update();
+                btnreset = false;
+            }
         }
     }
+
+    fly.update(vx, vy);
     flyPath.addRoughPoint(fly.pos.x * videoWidthVal, fly.pos.y * videoHeightVal);
 }
 
 async function draw() {
-    annoyance.show();
+    // annoyance.show();
     for(let catchmark of catchmarks) {
         catchmark.show();
     }
-    if(candy) candy.show();
+    // if(candy) candy.show();
     fly.show();
     flyPath.show();
+
+    if(bitemeter) {
+        bitemeter.show();
+    }
 }
 
 function getSqDistanceBetweenPoints(p1, p2) {
@@ -284,31 +322,35 @@ function getBoundingSqRadius(center, arr) {
 }
 
 function startGame() {
-    updateScore(0);
+    // updateScore(0);
     fly.reset();
     flyPath = new Path();
-    annoyance = new Meter();
-    candy = null;
+    updateHumanLives(3);
+    updateFlyLives(3);
+    // annoyance = new Meter();
+    // candy = null;
 }
 
 function closedFistHandler(e) {
     let fistflydist = Math.sqrt(getSqDistanceBetweenPoints(e.detail.center, fly.pos));
     let flycaught = false;
+    fist = e.detail;
 
-    if(fistflydist < e.detail.radius) {
+    if(fistflydist < e.detail.radius * 0.8) {
         // fly caught!
-        updateScore(score+1);
+        // updateScore(score+1);
+        updateFlyLives(flyLives - 1);
         fly.respawn();
         flyPath.clearPoints();
         flycaught = true;
-        candy = null;
-        annoyance.value = 0;
+        // candy = null;
+        // annoyance.value = 0;
     } 
 
     catchmarks.push(new Catchmark(e.detail.center, e.detail.radius, e.detail.handedness, flycaught));
     setTimeout(() => {
         catchmarks.shift();
-    }, popCatchmarkTimeout)
+    }, catchCooldownTime)
 }   
 
 function debounce(func, timeout = 30){
@@ -322,4 +364,14 @@ function debounce(func, timeout = 30){
 function updateScore(newScore) {
     score = newScore;
     document.getElementById('score_val').innerHTML = score;
+}
+
+function updateHumanLives(lives) {
+    humanLives = lives;
+    document.getElementById('human_lives').innerHTML = lives;
+}
+
+function updateFlyLives(lives) {
+    flyLives = lives;
+    document.getElementById('fly_lives').innerHTML = lives;
 }

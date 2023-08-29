@@ -5,6 +5,7 @@ class Catchmark {
         this.r1 = radius * videoWidthVal;
         this.r2 = this.r1 * (Math.random() * 0.3 + 0.5);
         this.scale = map(radius, 0, 0.25, 0.2, 3);
+        this.fontscale = map(radius, 0, 0.25, 50, 300);
         this.steps = Math.random() * 0.4 + 0.1;
         this.flycaught = flycaught;
         this.roughstyle = {
@@ -18,14 +19,23 @@ class Catchmark {
     }
 
     show() {
-        for(let deg = 0; deg < Math.PI * 2; deg += Math.PI * 0.1) {
-            let x1 = this.r1 * Math.cos(deg) + this.center.x * videoWidthVal;
-            let y1 = this.r1 * Math.sin(deg) + this.center.y * videoHeightVal;
-            let x2 = this.r2 * Math.cos(deg) + this.center.x * videoWidthVal;
-            let y2 = this.r2 * Math.sin(deg) + this.center.y * videoHeightVal;
-            rc.line(x1, y1, x2, y2, this.roughstyle);
-        }
-        rc.circle(this.center.x * videoWidthVal, this.center.y * videoHeightVal, this.r1);
+        // sparks
+        // for(let deg = 0; deg < Math.PI * 2; deg += Math.PI * 0.1) {
+        //     let x1 = this.r1 * Math.cos(deg) + this.center.x * videoWidthVal;
+        //     let y1 = this.r1 * Math.sin(deg) + this.center.y * videoHeightVal;
+        //     let x2 = this.r2 * Math.cos(deg) + this.center.x * videoWidthVal;
+        //     let y2 = this.r2 * Math.sin(deg) + this.center.y * videoHeightVal;
+        //     rc.line(x1, y1, x2, y2, this.roughstyle);
+        // }
+
+        // emoji
+        canvasCtx.font = `${this.fontscale}px Arial`;
+        canvasCtx.fillText("✊", this.center.x * videoWidthVal - this.r1 * 0.75, this.center.y * videoHeightVal + this.r1 * 0.75);
+        
+        // debug
+        // rc.circle(this.center.x * videoWidthVal, this.center.y * videoHeightVal, this.r1);
+
+        // fist svg
         // canvasCtx.save();
         // canvasCtx.translate((this.center.x) * videoWidthVal, this.center.y * videoHeightVal);
         // if(this.handedness == 'Right') {

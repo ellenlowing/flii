@@ -33,11 +33,11 @@ class Fly {
     respawn() {
         this.pos = {x: Math.random(), y: Math.random()};
         this.heading = Math.random() * Math.PI;
-        // this.speed += 0.0005;
+        this.speedup();
     }
 
     speedup() {
-        this.speed += 0.0005;
+        this.speed += 0.001;
     }
 
     update(vx, vy) {

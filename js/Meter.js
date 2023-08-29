@@ -1,15 +1,15 @@
 class Meter {
-    constructor() {
+    constructor(x, y, w) {
         this.value = 0;
-        this.w = 300;
-        this.h = 40;
-        this.x = videoWidthVal / 2 - this.w / 2;
-        this.y = videoHeightVal * 0.95 - this.h;
+        this.w = w;
+        this.h = 10;
+        this.x = x;
+        this.y = y;
         this.outlinestyle = {
             fill: '#ffffff00',
             stroke: '#ffffff',
             roughness: 0.5,
-            strokeWidth: 3
+            strokeWidth: 2
         };
         this.fillstyle = {
             stroke: '#ffffff00',
@@ -18,23 +18,16 @@ class Meter {
             fillStyle: 'zigzag',
             hachureGap: 1
         };
-        this.maxedCount = 0;
     }
 
     update() {
-        // this.value += 0.001;
-        this.outlinestyle.roughness = map(this.value, 0, 1, 0, 2.5);
+        this.outlinestyle.roughness = map(this.value, 0, 1, 0.5, 2);
         this.fillstyle.roughness = this.outlinestyle.roughness;
-
-        if(this.value >= 1) {
-            this.maxedCount++;
-            this.value = 0;
-        }
     }
 
     show() {
         canvasCtx.save();
-        canvasCtx.translate(this.x, this.y);
+        canvasCtx.translate(this.x * videoWidthVal + this.w / 2, this.y * videoHeightVal);
         canvasCtx.scale(-1, 1);
         rc.rectangle(0, 0, this.w, this.h, this.outlinestyle);
         if(this.value > 0) {
