@@ -31,9 +31,9 @@ class Catchmark {
         // emoji
         canvasCtx.font = `${this.fontscale}px Arial`;
         canvasCtx.fillText("✊", this.center.x * videoWidthVal - this.r1 * 0.75, this.center.y * videoHeightVal + this.r1 * 0.75);
-        
+
         // debug
-        // rc.circle(this.center.x * videoWidthVal, this.center.y * videoHeightVal, this.r1);
+        // rc.circle(this.center.x * videoWidthVal, this.center.y * videoHeightVal, 50);
 
         // fist svg
         // canvasCtx.save();

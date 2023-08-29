@@ -14,11 +14,12 @@ limitations under the License. */
 
 @use "@material";
 body {
-  font-family: roboto;
-  margin: 2em;
+  font-family: 'Iota Display A';
+  margin: 0;
   color: #3d3d3d;
   --mdc-theme-primary: #007f8b;
   --mdc-theme-on-primary: #f1f3f4;
+  overflow: hidden;
 }
 
 h1 {
@@ -59,14 +60,14 @@ section {
   position: relative;
   float: left;
   width: 48%;
-  margin: 2% 1%;
+  /* margin: 2% 1%; */
   cursor: pointer;
 }
 .videoView {
   position: absolute;
   float: left;
   width: 48%;
-  margin: 2% 1%;
+  /* margin: 2% 1%; */
   cursor: pointer;
   min-height: 500px;
 }
@@ -113,4 +114,53 @@ section {
   display: none;
   width: 100%;
   font-size: calc(8px + 1.2vw);
+}
+
+#container {
+  width: 100vw;
+  height: 92vh;
+  display: grid;
+  grid-template-columns: 1fr 960px 1fr;
+}
+#canvasContainer {
+  margin: 4vh 0;
+}
+.score_div {
+  text-align: center;
+  /* padding: 50vh 0; */
+}
+
+.score_div h4 {
+  padding: 10vh 0;
+  font-size: 40px;
+  font-weight: 500;
+}
+
+.score_div .lives_container {
+  font-size: 80px;
+  font-weight: 500;
+}
+
+.status_container {
+  padding: 20vh 0;
+  display: none;
+}
+
+.full-width {
+  width: 100vw;
+}
+
+#restartButton {
+  border-radius: 20px;
+  font-family: 'Iota Display A';
+  background-color: #000;
+  color: #fff;
+  padding: 8px 8px 12px 8px;
+  font-size: 20px;
+  margin-left: -90px;
+  left: 50%;
+  position: relative;
+  width: 180px;
+  border: none;
+  cursor: pointer;
 }

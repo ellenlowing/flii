@@ -53,8 +53,11 @@ class Fly {
         canvasCtx.save();
         canvasCtx.translate(this.pos.x * videoWidthVal, this.pos.y * videoHeightVal);
         canvasCtx.rotate(this.heading);
-        rc.ellipse(10, 0, 20, 10, this.wingstyle);
-        rc.ellipse(-10, 0, 20, 10, this.wingstyle);
+        canvasCtx.rotate(Math.PI * 0.2);
+        rc.ellipse(10, -2, 20, 10, this.wingstyle);
+        canvasCtx.rotate(-Math.PI * 0.4);
+        rc.ellipse(-10, -2, 20, 10, this.wingstyle);
+        canvasCtx.rotate(Math.PI * 0.2);
         rc.ellipse(0, 0, 12, 20, this.roughstyle);
         rc.polygon([[-2, -10], [0, -20], [2, -10]], this.roughstyle);
         rc.ellipse(-3.5, -10, 6, 6, this.eyestyle);

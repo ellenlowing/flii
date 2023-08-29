@@ -32,17 +32,33 @@ limitations under the License. -->
       <span class="mdc-button__ripple"></span>
       <span class="mdc-button__label">ENABLE WEBCAM</span>
     </button>
-    <button id="restartButton">
-      Restart
-    </button>
-    <div style="position: relative;">
-      <video id="webcam" autoplay playsinline></video>
-      <canvas class="output_canvas" id="output_canvas" width="960" height="720" style="position: absolute; left: 0px; top: 0px;"></canvas>
-      <p id='gesture_output' class="output">
+    
+    <div id="container">
+      <div class="score_div">
+        <h4>🪰</h4>
+        <h2 id="fly_lives" class="lives_container">3</h2>
+        <h5 id="fly_status" class="status_container">STATUS OK</h5>
+      </div>
+      <div id="canvasContainer" style="position: relative;">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas class="output_canvas" id="output_canvas" width="960" height="720" style="position: absolute; left: 0px; top: 0px;"></canvas>
+        <p id='gesture_output' class="output">
+      </div>
+      <div class="score_div">
+        <h4>🖐</h4>
+        <h2 id="human_lives" class="lives_container">3</h2>
+        <h5 id="human_status" class="status_container">STATUS OK</h5>
+      </div>
     </div>
+    <div class="full-width">
+      <button id="restartButton">
+        Restart
+      </button>
+    </div>
+    
     <!-- <h4>score: <span id="score_val"></span></h4> -->
-    <h4>human lives: <span id="human_lives">3</span></h4>
-    <h4>fly lives: <span id="fly_lives">3</span></h4>
+    
+    
   </div>
 </section>
 <!-- partial -->

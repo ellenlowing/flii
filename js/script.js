@@ -61,8 +61,8 @@ let catchCooldownTime = 2000;
 let catchCooled = true;
 let fist = null;
 let score = 0;
-let flyLives = 3;
-let humanLives = 3;
+let flyLives = totalLives;
+let humanLives = totalLives;
 let bitemeter = null;
 noise.seed(Math.random());
 
@@ -75,6 +75,7 @@ const controllers = {};
 
 function connecthandler(e) {
   addgamepad(e.gamepad);
+  document.getElementById('fly_status').innerHTML = 'STATUS OK';
 }
 
 function addgamepad(gamepad) {
@@ -84,6 +85,7 @@ function addgamepad(gamepad) {
 
 function disconnecthandler(e) {
   removegamepad(e.gamepad);
+  document.getElementById('fly_status').innerHTML = 'STATUS ERROR';
 }
 
 function removegamepad(gamepad) {
@@ -93,7 +95,7 @@ function removegamepad(gamepad) {
 function updateStatus() {
   if (!haveEvents) {
     scangamepads();
-  }
+  } 
 
   Object.entries(controllers).forEach(([i, controller]) => {
     vx = -controller.axes[0];
@@ -203,7 +205,8 @@ async function predictWebcam() {
 
         // analyze gesture landmarks and pass to event
         const fistCenter = getCenterOfPoints(results.landmarks[0]);
-        const fistRadius = Math.sqrt(getBoundingSqRadius(fistCenter, results.landmarks[0]));
+        const fistRadius = clamp(Math.sqrt(getBoundingSqRadius(fistCenter, results.landmarks[0])), 0, 0.1);
+        console.log(fistRadius);
 
         let closedFistEvent = new CustomEvent("closed_fist", {
             detail: {
@@ -258,6 +261,12 @@ function update() {
     //         candy = null;
     //     }
     // }
+
+    if(results.gestures.length > 0) {
+        document.getElementById('human_status').innerHTML = 'STATUS OK';
+    } else {
+        document.getElementById('human_status').innerHTML = 'STATUS ERROR';
+    }
 
     if(fist && bitemeter) {
         let fistflydist = Math.sqrt(getSqDistanceBetweenPoints(fist.center, fly.pos));
@@ -325,8 +334,8 @@ function startGame() {
     // updateScore(0);
     fly.reset();
     flyPath = new Path();
-    updateHumanLives(3);
-    updateFlyLives(3);
+    updateHumanLives(totalLives);
+    updateFlyLives(totalLives);
     // annoyance = new Meter();
     // candy = null;
 }
