@@ -8,7 +8,7 @@ const globalRoughStyle = {
     roughness: 1.4,
     fillStyle: 'solid'
 }
-const totalLives = 5;
+const totalLives = 0;
 
 const clamp = (num, min, max) => {
     return Math.min(Math.max(num, min), max);

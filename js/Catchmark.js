@@ -15,10 +15,9 @@ class Catchmark {
             fill: '#ffffff',
             fillStyle: 'hachure'
         };
-        console.log(radius);
     }
 
-    show() {
+    show(opacity) {
         // sparks
         // for(let deg = 0; deg < Math.PI * 2; deg += Math.PI * 0.1) {
         //     let x1 = this.r1 * Math.cos(deg) + this.center.x * videoWidthVal;
@@ -30,6 +29,7 @@ class Catchmark {
 
         // emoji
         canvasCtx.font = `${this.fontscale}px Arial`;
+        canvasCtx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         canvasCtx.fillText("✊", this.center.x * videoWidthVal - this.r1 * 0.75, this.center.y * videoHeightVal + this.r1 * 0.75);
 
         // debug

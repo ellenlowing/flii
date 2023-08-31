@@ -66,7 +66,7 @@ section {
 .videoView {
   position: absolute;
   float: left;
-  width: 48%;
+  width: 100vw;
   /* margin: 2% 1%; */
   cursor: pointer;
   min-height: 500px;
@@ -148,6 +148,7 @@ section {
 
 .full-width {
   width: 100vw;
+  position: relative;
 }
 
 #restartButton {
@@ -158,9 +159,31 @@ section {
   padding: 8px 8px 12px 8px;
   font-size: 20px;
   margin-left: -90px;
-  left: 50%;
-  position: relative;
+  left: 74.5%;
+  position: absolute;
   width: 180px;
   border: none;
   cursor: pointer;
+}
+
+.full-width h2 {
+  font-size: 30px;
+  position: absolute;
+  left: 19.5%;
+  top:0;
+  margin: 0;
+  padding: 0;
+}
+
+#result {
+  font-weight: bolder;
+  display: block;
+  position: absolute;
+  font-size: 160px;
+  text-align: center;
+  color: #fff;
+  padding: 0 20%;
+  mix-blend-mode: exclusion;
+  /* width: 100vw;
+  height: 100vh; */
 }

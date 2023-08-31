@@ -20,14 +20,16 @@ class Meter {
         };
     }
 
-    update() {
+    update(x, y) {
         this.outlinestyle.roughness = map(this.value, 0, 1, 0.5, 2);
         this.fillstyle.roughness = this.outlinestyle.roughness;
+        this.x = x;
+        this.y = y;
     }
 
     show() {
         canvasCtx.save();
-        canvasCtx.translate(this.x * videoWidthVal + this.w / 2, this.y * videoHeightVal);
+        canvasCtx.translate(this.x * videoWidthVal, this.y * videoHeightVal);
         canvasCtx.scale(-1, 1);
         rc.rectangle(0, 0, this.w, this.h, this.outlinestyle);
         if(this.value > 0) {
